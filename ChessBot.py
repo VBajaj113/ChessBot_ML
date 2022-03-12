@@ -5,6 +5,13 @@
 # En Passant
 # Pawn Upgradation
 
+#To Do
+#Boaard Initialisation -- Done
+#Pieces Movement List -- Done
+#Pieces can cut each other -- Done
+#Check check after each move -- Done
+#Alternative turns
+
 #-------------------------------------------------------------------------#
 
 WHITE = 0
@@ -19,7 +26,6 @@ class Square:
     def __init__(self, y, x, piece=None):  # Input row, coloumn = y,x
         self.x = x
         self.y = y
-        self.col = (x+y+1) % 2
         self.piece = piece
 
     def __repr__(self):  # When square is called, prints the square rank+file
@@ -82,6 +88,15 @@ class Board:
             temp = [self.board[i][j] for j in range(8)]
             print(*temp)
         return ""
+    
+    def isCheck(self, king):
+        for i in range(8):
+            for j in range(8):
+                sq = self.board[i][j]
+                if sq.piece != None and sq.piece.col != king.col:
+                    if king.sq in sq.piece.move_list():
+                        return True
+        return False
 
 
 ChessBoard = Board()
