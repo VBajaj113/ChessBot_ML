@@ -13,7 +13,7 @@
 #All possible Turns Dictionary -- Done
 #Alternative turns -- Done
 #Expand Illegal Moves (Check) -- Done
-#Checkmate and Check to be integratd
+#Checkmate to be integrated
 
 #-------------------------------------------------------------------------#
 
@@ -115,6 +115,25 @@ class Board:
                     move_dict[sq.piece.type].append(repr(sq) + " " + str(sq.piece.move_list()))
         return move_dict
 
+    def isCheckmate(self, king):
+        return self.isCheck(king) and self.isStalemate(king)
+    
+    def isStalemate(self, king):
+        for i in range(1,7):
+            all_moves = self.turn_dict(king.col)
+            initial, final_list = all_moves[i].split()
+            final_list = list(final_list)
+            initial = convert_square(initial)
+            for j in final_list:
+                final = convert_square(j)
+                initial.piece.move(final)
+                if self.isCheck(king):
+                    final.piece.force_move(initial)
+                else:
+                    final.piece.force_move(initial)
+                    return False
+        return True
+
 
 ChessBoard = Board()
 
@@ -184,24 +203,32 @@ class Queen(Piece):
         for i in range(1,8):
             if row+i < 8 and coloumn+i < 8 and self.can_move(board[row+i][coloumn+i]):
                 moves.append(board[row+i][coloumn+i])
+                if board[row+i][coloumn+i].piece != None:
+                    break
             else:
                 break
         
         for i in range(1,8):
             if row-i > -1 and coloumn-i > -1 and self.can_move(board[row-i][coloumn-i]):
                 moves.append(board[row-i][coloumn-i])
+                if board[row-i][coloumn-i].piece != None:
+                    break
             else:
                 break
         
         for i in range(1,8):
             if row+i < 8 and coloumn-i > -1 and self.can_move(board[row+i][coloumn-i]):
                 moves.append(board[row+i][coloumn-i])
+                if board[row+i][coloumn-i].piece != None:
+                    break
             else:
                 break
         
         for i in range(1,8):
             if row-i > -1 and coloumn+i < 8 and self.can_move(board[row-i][coloumn+i]):
                 moves.append(board[row-i][coloumn+i])
+                if board[row-i][coloumn+i].piece != None:
+                    break
             else:
                 break
 
