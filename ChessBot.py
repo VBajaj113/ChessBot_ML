@@ -13,7 +13,7 @@
 #All possible Turns Dictionary -- Done
 #Alternative turns -- Done
 #Expand Illegal Moves (Check) -- Done
-#Checkmate to be integrated
+#Checkmate and Stalemate to be integrated
 
 #-------------------------------------------------------------------------#
 
@@ -124,17 +124,26 @@ class Board:
     def isMate(self, king):
         for i in range(1,7):
             all_moves = self.turn_dict(king.col)
-            initial, final_list = all_moves[i].split()
-            final_list = list(final_list)
-            initial = convert_square(initial)
-            for j in final_list:
-                final = convert_square(j)
-                initial.piece.move(final)
-                if self.isCheck(king):
-                    final.piece.force_move(initial)
+            for j in all_moves[i]:
+                print(j)
+                initial, final_list = j[0:2], j[4:-1]
+                if len(final_list)==0:
+                    pass
                 else:
-                    final.piece.force_move(initial)
-                    return False
+                    final_list = list(final_list.split(", "))
+                    initial = convert_square(initial)
+                    print(initial ,final_list)
+                    for j in range(len(final_list)):
+                        final = convert_square(final_list[j])
+                        temp = final.piece
+                        initial.piece.move(final)
+                        if self.isCheck(king):
+                            final.piece.force_move(initial)
+                            final.piece = temp
+                        else:
+                            final.piece.force_move(initial)
+                            final.piece = temp
+                            return False
         return True
 
 
