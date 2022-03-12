@@ -12,7 +12,7 @@
 #Check check after each move -- Done
 #All possible Turns Dictionary -- Done
 #Alternative turns -- Done
-#Expand Illegal Moves (Check)
+#Expand Illegal Moves (Check) -- Done
 #Checkmate and Check to be integratd
 
 #-------------------------------------------------------------------------#
@@ -141,6 +141,12 @@ class Piece:
         
         else:
             return False
+    
+    def force_move(self,dest):
+        del dest.piece
+        dest.piece = self
+        self.sq.piece = None
+        self.sq = dest
 
 
 class King(Piece):
@@ -324,24 +330,32 @@ class Bishop(Piece):
         for i in range(1,8):
             if row+i < 8 and coloumn+i < 8 and self.can_move(board[row+i][coloumn+i]):
                 moves.append(board[row+i][coloumn+i])
+                if board[row+i][coloumn+i].piece != None:
+                    break
             else:
                 break
         
         for i in range(1,8):
             if row-i > -1 and coloumn-i > -1 and self.can_move(board[row-i][coloumn-i]):
                 moves.append(board[row-i][coloumn-i])
+                if board[row-i][coloumn-i].piece != None:
+                    break
             else:
                 break
         
         for i in range(1,8):
             if row+i < 8 and coloumn-i > -1 and self.can_move(board[row+i][coloumn-i]):
                 moves.append(board[row+i][coloumn-i])
+                if board[row+i][coloumn-i].piece != None:
+                    break
             else:
                 break
         
         for i in range(1,8):
             if row-i > -1 and coloumn+i < 8 and self.can_move(board[row-i][coloumn+i]):
                 moves.append(board[row-i][coloumn+i])
+                if board[row-i][coloumn+i].piece != None:
+                    break
             else:
                 break
         
@@ -439,10 +453,19 @@ def current_play(counter):
             initial = convert_square(move[0])
             final = convert_square(move[1])
             if initial.piece.col == 0:
-                if initial.piece.move(final) == False:
+                temp = initial.piece.move(final)
+                if  temp == False:
                     clearConsole()
                     print("Please Input a Legal Move")
                     time.sleep(1)
+                    return current_play(counter)
+
+                elif ChessBoard.isCheck(WK):
+                    clearConsole()
+                    print("Error: White King in Check after the move. Be aware!")
+                    print(ChessBoard)
+                    time.sleep(2)
+                    final.piece.force_move(initial)
                     return current_play(counter)
             else:
                 clearConsole()
@@ -462,6 +485,14 @@ def current_play(counter):
                     print("Please Input a Legal Move")
                     time.sleep(1)
                     return current_play(counter)
+
+                elif ChessBoard.isCheck(BK):
+                    clearConsole()
+                    print("Error: Black King in Check after the move. Be aware!")
+                    print(ChessBoard)
+                    time.sleep(2)
+                    final.piece.force_move(initial)
+                    return current_play(counter)
             else:
                 clearConsole()
                 print("Please Input Black's Move")
@@ -470,6 +501,7 @@ def current_play(counter):
     except:
         clearConsole()
         print("Please Input as per Move Notation: 'Initial' + ' ' + 'Final' ")
+        print("Make Sure the initial place has a piece")        #Correct this
         time.sleep(1)
         return current_play(counter)
 
@@ -527,6 +559,7 @@ counter = 0
 while WK.sq.piece == WK and BK.sq.piece == BK:
     counter = current_play(counter)
 
+clearConsole()
 if WK.sq.piece != WK:
     print("Black Wins! Congrats!")
 else:
