@@ -10,7 +10,10 @@
 #Pieces Movement List -- Done
 #Pieces can cut each other -- Done
 #Check check after each move -- Done
-#Alternative turns
+#All possible Turns Dictionary -- Done
+#Alternative turns -- Done
+#Expand Illegal Moves (Check)
+#Checkmate and Check to be integratd
 
 #-------------------------------------------------------------------------#
 
@@ -98,6 +101,15 @@ class Board:
                         return True
         return False
 
+    def turn_dict(self, col):                           #Needs improvement
+        move_dict = {1:[], 2:[],3:[],4:[], 5:[], 6:[]}
+        for i in range(8):
+            for j in range(8):
+                sq = self.board[i][j]
+                if sq.piece != None and sq.piece.col == col:
+                    move_dict[sq.piece.type].append(repr(sq) + " " + str(sq.piece.move_list()))
+        return move_dict
+
 
 ChessBoard = Board()
 
@@ -112,15 +124,17 @@ class Piece:
         board = ChessBoard.board
         if board[dest.y][dest.x].piece == None or board[dest.y][dest.x].piece.col != self.col:
             return True
+        return False
     
     def move(self, dest):
         if dest in self.move_list():
             dest.piece = self
             self.sq.piece = None
             self.sq = dest
+            return True
         
         else:
-            print("Illegal Move")
+            return False
 
 
 class King(Piece):
@@ -403,6 +417,44 @@ class Pawn(Piece):
 ChessBoard.board_reset()
 board = ChessBoard.board
 
+
+def convert_square(s):
+    i = FILES.index(s[0])
+    j = int(s[1])-1
+    return board[j][i]
+
+def current_play(counter):
+    if counter == 0:
+        print(ChessBoard)
+        print ("White's Turn: Input initial and Final Squares")
+        move = list(input().split())
+        initial = convert_square(move[0])
+        final = convert_square(move[1])
+        if initial.piece.col == 0:
+            if initial.piece.move(final) == False:
+                print("Please Input a Legal Move")
+                return current_play(counter)
+        else:
+            print("Please Input White's Move")
+            return current_play(counter)
+    
+    else:
+        print(ChessBoard)
+        print ("Black's Turn: Input initial and Final Squares")
+        move = list(input().split())
+        initial = convert_square(move[0])
+        final = convert_square(move[1])
+        if initial.piece.col == 0:
+            if initial.piece.move(final) == False:
+                print("Please Input a Legal Move")
+                return current_play(counter)
+        else:
+            print("Please Input Black's Move")
+            return current_play(counter)
+
+    return (counter+1)%2
+
+
 # White Pieces
 WP1 = ChessBoard.board[1][0].piece
 WP2 = ChessBoard.board[1][1].piece
@@ -447,6 +499,17 @@ BB2 = ChessBoard.board[7][5].piece
 BQ = ChessBoard.board[7][3].piece
 BK = ChessBoard.board[7][4].piece
 
+ChessBoard.board_reset()
+
+counter = 0
+while WK != None and BK != None:
+    counter = current_play(counter)
+
+if WK == None:
+    print("Black Wins! Congrats!")
+else:
+    print("White Wins! Congrats!")
 
 
 print(ChessBoard)
+
