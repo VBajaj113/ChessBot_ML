@@ -116,9 +116,12 @@ class Board:
         return move_dict
 
     def isCheckmate(self, king):
-        return self.isCheck(king) and self.isStalemate(king)
+        return self.isCheck(king) and self.isMate(king)
     
     def isStalemate(self, king):
+        return (not self.isCheck(king)) and self.isMate(king)
+    
+    def isMate(self, king):
         for i in range(1,7):
             all_moves = self.turn_dict(king.col)
             initial, final_list = all_moves[i].split()
@@ -583,14 +586,16 @@ BK = ChessBoard.board[7][4].piece
 
 
 counter = 0
-while WK.sq.piece == WK and BK.sq.piece == BK:
+while not (ChessBoard.isCheckmate(WK) or ChessBoard.isStalemate(WK) or ChessBoard.isStalemate(BK) or ChessBoard.isCheckmate(BK)):
     counter = current_play(counter)
 
 clearConsole()
-if WK.sq.piece != WK:
+if ChessBoard.isCheckmate(WK):
     print("Black Wins! Congrats!")
-else:
+elif ChessBoard.isCheckmate(BK):
     print("White Wins! Congrats!")
+else:
+    print("Great Play! It's a tie!")
 
 
 print(ChessBoard)
