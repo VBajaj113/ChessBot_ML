@@ -17,6 +17,11 @@
 
 #-------------------------------------------------------------------------#
 
+import os,time
+
+clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
+
+
 WHITE = 0
 BLACK = 1
 
@@ -424,6 +429,7 @@ def convert_square(s):
     return board[j][i]
 
 def current_play(counter):
+    clearConsole()
     if counter == 0:
         print(ChessBoard)
         print ("White's Turn: Input initial and Final Squares")
@@ -432,10 +438,14 @@ def current_play(counter):
         final = convert_square(move[1])
         if initial.piece.col == 0:
             if initial.piece.move(final) == False:
+                clearConsole()
                 print("Please Input a Legal Move")
+                time.sleep(1)
                 return current_play(counter)
         else:
+            clearConsole()
             print("Please Input White's Move")
+            time.sleep(1)
             return current_play(counter)
     
     else:
@@ -444,12 +454,16 @@ def current_play(counter):
         move = list(input().split())
         initial = convert_square(move[0])
         final = convert_square(move[1])
-        if initial.piece.col == 0:
+        if initial.piece.col == 1:
             if initial.piece.move(final) == False:
+                clearConsole()
                 print("Please Input a Legal Move")
+                time.sleep(1)
                 return current_play(counter)
         else:
+            clearConsole()
             print("Please Input Black's Move")
+            time.sleep(1)
             return current_play(counter)
 
     return (counter+1)%2
