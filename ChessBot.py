@@ -6,32 +6,38 @@
 # Pawn Upgradation
 
 #To Do
-#Boaard Initialisation -- Done
+#Board Initialisation -- Done
 #Pieces Movement List -- Done
 #Pieces can cut each other -- Done
 #Check check after each move -- Done
 #All possible Turns Dictionary -- Done
 #Alternative turns -- Done
 #Expand Illegal Moves (Check) -- Done
-#Checkmate and Stalemate to be integrated
+#Checkmate and Stalemate to be integrated -- Done
+#Document -- Done ig
+
+#Might add board position list for easy reference
 
 #-------------------------------------------------------------------------#
 
-import os,time
+import os,time      #For clearscreen and to stop program, basically so that user will like the chess
 
 clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
+#Cleaar Screen copied from net
 
-
+#Reference:
 WHITE = 0
 BLACK = 1
 
-PIECE_DICT = {1: 'P', 2: 'N', 3: 'B', 4: 'R', 5: 'Q', 6: 'K'}
-FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-REV_FILES = [0, 1, 2, 3, 4, 5, 6, 7]
+PIECE_DICT = {1: 'P', 2: 'N', 3: 'B', 4: 'R', 5: 'Q', 6: 'K'}   #References
+FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']                #The coloumns
+REV_FILES = [0, 1, 2, 3, 4, 5, 6, 7]                            #Coloumns in numbers
 
 
 class Square:
-    def __init__(self, y, x, piece=None):  # Input row, coloumn = y,x
+    #Each square of the board
+    
+    def __init__(self, y, x, piece=None):  # Input row, coloumn = y, x (Might change to x,y if persisted)
         self.x = x
         self.y = y
         self.piece = piece
@@ -47,7 +53,9 @@ class Square:
 
 
 class Board:
-    def __init__(self):
+    #Our ChessBoard
+
+    def __init__(self):     #Initialises an empty chessboard
         board = []
         for i in range(8):  # The ranks (rows)
             row = []
@@ -57,13 +65,13 @@ class Board:
             board.append(row)
         self.board = board
 
-    def board_reset(self):
+    def board_reset(self):  #Resets the board for a new game, adds the pieces to the correct position
         # Pawns
         for i in range(8):
             self.board[1][i].piece = Pawn(0, self.board[1][i])
             self.board[6][i].piece = Pawn(1, self.board[6][i])
 
-        # Manual work... Welp
+        # Manual work... :'(
 
         # Rooks
         self.board[0][0].piece = Rook(0, self.board[0][0])
@@ -91,13 +99,15 @@ class Board:
         self.board[0][4].piece = King(0, self.board[0][4])
         self.board[7][4].piece = King(1, self.board[7][4])
 
-    def __str__(self):
+    def __str__(self):      #Prints the current piece position
         for i in range(7, -1, -1):
             temp = [self.board[i][j] for j in range(8)]
             print(*temp)
+        #Might add another printing line which prints the board positions for easy reference
         return ""
     
-    def isCheck(self, king):
+    def isCheck(self, king):    #Whether king is in check
+        #Iterates over all pieces and seeing whether it is threating the king or not
         for i in range(8):
             for j in range(8):
                 sq = self.board[i][j]
@@ -106,26 +116,32 @@ class Board:
                         return True
         return False
 
-    def turn_dict(self, col):                           #Needs improvement
-        move_dict = {1:[], 2:[],3:[],4:[], 5:[], 6:[]}
-        for i in range(8):
+    def turn_dict(self, col):   #Returns all the possible moves of a colour
+
+        move_dict = {1:[], 2:[],3:[],4:[], 5:[], 6:[]}  #Initialise
+        
+        #Loops over all possible case and adds the moves
+        for i in range(8):  
             for j in range(8):
                 sq = self.board[i][j]
                 if sq.piece != None and sq.piece.col == col:
                     move_dict[sq.piece.type].append(repr(sq) + " " + str(sq.piece.move_list()))
         return move_dict
 
-    def isCheckmate(self, king):
+    def isCheckmate(self, king):    #Checks whether king is in Checkmate
         return self.isCheck(king) and self.isMate(king)
     
-    def isStalemate(self, king):
+    def isStalemate(self, king):    #Checks whether king is in stalemate
         return (not self.isCheck(king)) and self.isMate(king)
     
-    def isMate(self, king):
+    def isMate(self, king):     #A common function for checking whether the king is in mate or not
+        #Check or stale would be added later xp
+        #Basically the commonality between stale and check, whether the king is threatened over
+        #any position move of any other piece of king's color
+
         for i in range(1,7):
             all_moves = self.turn_dict(king.col)
             for j in all_moves[i]:
-                print(j)
                 initial, final_list = j[0:2], j[4:-1]
                 if len(final_list)==0:
                     pass
@@ -147,10 +163,13 @@ class Board:
         return True
 
 
-ChessBoard = Board()
+ChessBoard = Board()        #Our ChessBoard in this game
+#Big name, I know. Had to write a few many times...
 
 
 class Piece:
+    #The base class for all the pieces on the board with move function
+
     def __init__(self, color, square, piece_type=None):
         self.type = piece_type
         self.sq = square
@@ -162,7 +181,7 @@ class Piece:
             return True
         return False
     
-    def move(self, dest):
+    def move(self, dest):           #If legal, then can move
         if dest in self.move_list():
             del dest.piece
             dest.piece = self
@@ -173,7 +192,7 @@ class Piece:
         else:
             return False
     
-    def force_move(self,dest):
+    def force_move(self,dest):      #Clear from name
         del dest.piece
         dest.piece = self
         self.sq.piece = None
@@ -181,10 +200,11 @@ class Piece:
 
 
 class King(Piece):
-    def __init__(self, color, square, piece_type=6):
+    def __init__(self, color, square, piece_type = 6):
         super().__init__(color, square, piece_type)
 
     def move_list(self):
+        #Generates the legal move list of the piece
         moves = []
         row = self.sq.y
         coloumn = self.sq.x
@@ -203,7 +223,7 @@ class King(Piece):
 
 
 class Queen(Piece):
-    def __init__(self, color, square, piece_type=5):
+    def __init__(self, color, square, piece_type = 5):
         super().__init__(color, square, piece_type)
     
     def move_list(self):
@@ -212,6 +232,7 @@ class Queen(Piece):
         row = self.sq.y
         coloumn = self.sq.x
 
+        #Bishops move
         for i in range(1,8):
             if row+i < 8 and coloumn+i < 8 and self.can_move(board[row+i][coloumn+i]):
                 moves.append(board[row+i][coloumn+i])
@@ -243,7 +264,8 @@ class Queen(Piece):
                     break
             else:
                 break
-
+        
+        #Rook's moves
         for i in range(1,8):
             if row+i<8 and row+i >-1:
                 if board[row+i][coloumn].piece != None:
@@ -478,34 +500,42 @@ board = ChessBoard.board
 
 
 def convert_square(s):
+    #Converts the input to the corresponding square of the board
     i = FILES.index(s[0])
     j = int(s[1])-1
     return board[j][i]
 
 def current_play(counter):
+    #The game runner
+
     clearConsole()
     try:
-        if counter == 0:
+        if counter == 0:    #White's move
+
             print(ChessBoard)
+
             print ("White's Turn: Input Initial and Final Squares")
             move = list(input().split())
             initial = convert_square(move[0])
             final = convert_square(move[1])
-            if initial.piece.col == 0:
-                temp = initial.piece.move(final)
+
+            if initial.piece.col == 0:  #Checks whether the colour is correct
+                temp = initial.piece.move(final)    #Temporary moves the piece to see whether it is valid
+
                 if  temp == False:
                     clearConsole()
                     print("Please Input a Legal Move")
                     time.sleep(1)
                     return current_play(counter)
 
-                elif ChessBoard.isCheck(WK):
+                elif ChessBoard.isCheck(WK):    #If the move puts king in check
                     clearConsole()
                     print("Error: White King in Check after the move. Be aware!")
                     print(ChessBoard)
                     time.sleep(2)
                     final.piece.force_move(initial)
                     return current_play(counter)
+
             else:
                 clearConsole()
                 print("Please Input White's Move")
@@ -514,11 +544,14 @@ def current_play(counter):
         
         else:
             print(ChessBoard)
+
             print ("Black's Turn: Input Initial and Final Squares")
             move = list(input().split())
             initial = convert_square(move[0])
             final = convert_square(move[1])
+            
             if initial.piece.col == 1:
+            
                 if initial.piece.move(final) == False:
                     clearConsole()
                     print("Please Input a Legal Move")
@@ -532,14 +565,16 @@ def current_play(counter):
                     time.sleep(2)
                     final.piece.force_move(initial)
                     return current_play(counter)
+            
             else:
                 clearConsole()
                 print("Please Input Black's Move")
                 time.sleep(1)
                 return current_play(counter)
+
     except:
         clearConsole()
-        print("Please Input as per Move Notation: 'Initial' + ' ' + 'Final' ")
+        print("Please Input as per Move Notation: 'Initial' + ' ' + 'Final'")
         print("Make Sure the initial place has a piece")        #Correct this
         time.sleep(1)
         return current_play(counter)
@@ -547,7 +582,9 @@ def current_play(counter):
     return (counter+1)%2
 
 
-ChessBoard.board_reset()
+ChessBoard.board_reset()    #Initialise the board
+
+#Oof... Hard Work again...
 
 # White Pieces
 WP1 = ChessBoard.board[1][0].piece
@@ -569,6 +606,7 @@ WB1 = ChessBoard.board[0][2].piece
 WB2 = ChessBoard.board[0][5].piece
 
 WQ = ChessBoard.board[0][3].piece
+
 WK = ChessBoard.board[0][4].piece
 
 # Black Pieces
@@ -591,11 +629,13 @@ BB1 = ChessBoard.board[7][2].piece
 BB2 = ChessBoard.board[7][5].piece
 
 BQ = ChessBoard.board[7][3].piece
+
 BK = ChessBoard.board[7][4].piece
 
 
 counter = 0
-while not (ChessBoard.isCheckmate(WK) or ChessBoard.isStalemate(WK) or ChessBoard.isStalemate(BK) or ChessBoard.isCheckmate(BK)):
+while not (ChessBoard.isCheckmate(WK) or ChessBoard.isStalemate(WK) or\
+    ChessBoard.isStalemate(BK) or ChessBoard.isCheckmate(BK)):
     counter = current_play(counter)
 
 clearConsole()
